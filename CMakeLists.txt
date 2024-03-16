@@ -237,7 +237,7 @@ string(SUBSTRING ${RUBY_VER} 0 3 RUBY_VER_BASE)
 string(CONCAT RUBY_API_VER ${RUBY_VER_BASE} ".0")
 
 if(DWARFS_PRELOAD)
-  def_ext_prj_t(LIBDWARFS_WR "0.5.0.rc14" "085eb1aeed100c5662ff9afff386c2f0cbe2065ddefe5adcd45a755b547532b0")
+  def_ext_prj_t(LIBDWARFS_WR "0.5.0.rc15" "085eb1aeed100c5662ff9afff386c2f0cbe2065ddefe5adcd45a755b547532b0")
 
   string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+).*" "\\1;\\2;\\3" LIBDWARFS_WR_VER_COMPONENTS ${LIBDWARFS_WR_VER})
 
@@ -246,16 +246,8 @@ if(DWARFS_PRELOAD)
   list(GET LIBDWARFS_WR_VER_COMPONENTS 2 LIBDWARFS_WR_VER_PATCH)
   set (LIBDWARFS_WR_VER_M ${LIBDWARFS_WR_VER_MAJOR}.${LIBDWARFS_WR_VER_MINOR}.${LIBDWARFS_WR_VER_PATCH})
 else(DWARFS_PRELOAD)
-  def_ext_prj_g(DWARFS_WR "v0.5.0.rc14")
+  def_ext_prj_g(DWARFS_WR "v0.5.0.rc15")
 endif(DWARFS_PRELOAD)
-
-find_library(_LIBNCURSES "libncurses.a")
-if(${_LIBNCURSES} STREQUAL "_LIBNCURSES-NOTFOUND")
-  set(WITH_NCURSES_BUILD ON)
-  def_ext_prj_t(NCURSES  "6.3" "97fc51ac2b085d4cde31ef4d2c3122c21abc217e9090a43a30fc5ec21684e059")
-else()
-  set(WITH_NCURSES_BUILD OFF)
-endif()
 
 set(LIBYAML_RUBY_OPTION "")
 if(${RUBY_VER} VERSION_LESS "3.2.0")
@@ -264,12 +256,6 @@ endif(${RUBY_VER} VERSION_LESS "3.2.0")
 
 message("Configuration summary:")
 message(STATUS "ruby: v${RUBY_VER} at ${RUBY_SOURCE_DIR}")
-
-if(WITH_NCURSES_BUILD)
-  message(STATUS "ncurses: building v${NCURSES_VER} at ${NCURSES_SOURCE_DIR}")
-else()
-  message(STATUS "ncurses: ${_LIBNCURSES}")
-endif(WITH_NCURSES_BUILD)
 
 if(DWARFS_PRELOAD)
   message(STATUS "dwarfs with tebako wrapper: deploying v${LIBDWARFS_WR_VER} to ${LIBDWARFS_WR_SOURCE_DIR}")
@@ -373,25 +359,6 @@ else(DWARFS_PRELOAD)
   )
 endif(DWARFS_PRELOAD)
 
-if(WITH_NCURSES_BUILD)
-  ExternalProject_Add(${NCURSES_PRJ}
-    PREFIX ${DEPS}
-    URL https://ftp.gnu.org/pub/gnu/ncurses/ncurses-${NCURSES_VER}.tar.gz
-    URL_HASH SHA256=${NCURSES_HASH}
-    DOWNLOAD_NO_PROGRESS true
-    SOURCE_DIR ${NCURSES_SOURCE_DIR}
-    UPDATE_COMMAND ""
-    CONFIGURE_COMMAND ${NCURSES_SOURCE_DIR}/configure
-                          --without-shared
-                          --without-cxx-shared
-                          --without-tests
-                          --prefix=${DEPS}
-                          --srcdir=${NCURSES_SOURCE_DIR}
-    BUILD_COMMAND     make
-    INSTALL_COMMAND   make install
-  )
-endif(WITH_NCURSES_BUILD)
-
 # ...................................................................
 # Ruby
 
@@ -454,9 +421,6 @@ ExternalProject_Add(${RUBY_PRJ}
 )
 
 add_dependencies(${RUBY_PRJ} ${DWARFS_WR_PRJ} ${LIBDWARFS_WR_PRJ})
-if(WITH_NCURSES_BUILD)
-  add_dependencies(${RUBY_PRJ} ${NCURSES_PRJ})
-endif(WITH_NCURSES_BUILD)
 
 if (${SETUP_MODE})
   add_custom_target(setup
