@@ -50,9 +50,11 @@ module Tebako
 
     def cfg_options
       ruby_ver, ruby_hash = extend_ruby_version
+      # Cannot use 'xxx' as parameters because it does not work in Windows shells
+      # So we have to use \"xxx\"
       @cfg_options ||=
-        "-DCMAKE_BUILD_TYPE=Release -DRUBY_VER:STRING='#{ruby_ver}' -DRUBY_HASH:STRING='#{ruby_hash}' " \
-        "-DDEPS:STRING='#{deps}' -G '#{m_files}' -B '#{output}' -S '#{source}'"
+        "-DCMAKE_BUILD_TYPE=Release -DRUBY_VER:STRING=\"#{ruby_ver}\" -DRUBY_HASH:STRING=\"#{ruby_hash}\" " \
+        "-DDEPS:STRING=\"#{deps}\" -G \"#{m_files}\" -B \"#{output}\" -S \"#{source}\""
     end
 
     def deps
@@ -83,7 +85,9 @@ module Tebako
                    when /linux/, /darwin/
                      "Unix Makefiles"
                    when /msys|mingw|cygwin/
-                     "Ninja"
+                     # Ninja is not able to handle "mkdwarfs ..." call emitted from cmake
+                     # So we have to use MinGW Makefiles on Windows despite poor performance
+                     "MinGW Makefiles"
                    else
                      raise Tebako::Error.new(
                        "#{RUBY_PLATFORM} is not supported yet, exiting",
@@ -135,8 +139,7 @@ module Tebako
     def press_options
       @press_options ||=
         "-DROOT:STRING='#{root}' -DENTRANCE:STRING='#{options["entry-point"]}' " \
-        "-DPCKG:STRING='#{package}' -DLOG_LEVEL:STRING='#{options["log-level"]}' " \
-        "-DFS_CURRENT=#{fs_current}"
+        "-DPCKG:STRING='#{package}' -DLOG_LEVEL:STRING='#{options["log-level"]}' "
     end
 
     def relative?(path)

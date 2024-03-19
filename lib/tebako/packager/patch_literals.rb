@@ -124,6 +124,7 @@ module Tebako
               ruby_sysinit(&argc, &argv);
           /* -- Start of tebako patch -- */
               if (tebako_main(&argc, &argv) != 0) {
+                printf("Tebako intialization failed.");
                 return -1;
               }
           /* -- End of tebako patch -- */
@@ -253,24 +254,6 @@ module Tebako
           "mf.macro \"EXTLIBS\", $extlibs" => "#  mf.macro \"EXTLIBS\", $extlibs   tebako patched"
         }
       }.freeze
-
-      # rubocop:disable Style/WordArray
-
-      # NOTE: folly provides build-in implementation of jemalloc
-
-      DARWIN_BREW_LIBS = [
-        ["zlib", "z"],            ["gdbm", "gdbm"],           ["readline", "readline"], ["libffi", "ffi"],
-        ["ncurses", "ncurses"],   ["fmt", "fmt"],             ["lz4", "lz4"],           ["xz", "lzma"],
-        ["libyaml", "yaml"],      ["boost", "boost_chrono"],
-        ["double-conversion", "double-conversion"]
-      ].freeze
-
-      DARWIN_BREW_LIBS_PRE_31 = [["openssl@1.1", "ssl"], ["openssl@1.1", "crypto"]].freeze
-
-      DARWIN_BREW_LIBS_31 = [["libyaml", "yaml"], ["openssl@3", "ssl"], ["openssl@3", "crypto"]].freeze
-
-      DARWIN_DEP_LIBS = ["glog", "gflags", "brotlienc", "brotlidec", "brotlicommon"].freeze
-      # rubocop:enable Style/WordArray
     end
   end
 end

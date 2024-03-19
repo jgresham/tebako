@@ -322,6 +322,7 @@ else(DWARFS_PRELOAD)
                  -DWITH_COVERAGE:BOOL=OFF
                  -DTEBAKO_BUILD_SCOPE=MKD
                  -DRB_W32=${RB_W32}
+                 -GNinja
       BUILD_BYPRODUCTS ${__LIBDWARFS_WR}
                        ${__LIBDWARFS} ${__LIBFSST} ${__LIBFOLLY} ${__LIBT_METADATA}
                        ${__LIBT_LIGHT} ${__LIBXXHASH} ${__LIBZSTD} ${__LIBARCHIVE}
@@ -556,6 +557,7 @@ else (${SETUP_MODE})
     COMMAND ${DEPS_BIN_DIR}/mkdwarfs -o ${DATA_BIN_FILE} -i ${DATA_SRC_DIR}
     COMMAND ${CMAKE_COMMAND} -E touch ${DEPS_SRC_DIR}/tebako/tebako-fs.cpp
     DEPENDS setup source_filesystem
+    VERBATIM
     BYPRODUCTS ${DATA_BIN_FILE}
   )
 

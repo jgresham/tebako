@@ -1,1 +1,6 @@
 prefix: PWD
+
+# MAINLIBS = -l:libtebako-fs.a -l:libdwarfs-wr.a -l:libdwarfs.a -Wl,--push-state,--whole-archive -l:libdwarfs_compression.a -Wl,--pop-state -l:libfolly.a -l:libfsst.a           \
+# -l:libmetadata_thrift.a -l:libthrift_light.a -l:libxxhash.a -l:libfmt.a -l:libdouble-conversion.a -l:libglog.a -l:libgflags.a -l:libevent.a                         \
+# -l:libssl.a -l:libcrypto.a -l:liblz4.a -l:libz.a -l:libzstd.a -l:libbrotlienc.a -l:libbrotlidec.a -l:libbrotlicommon.a -l:libffi.a -l:libncurses.a -l:libunwind.a -l:liblzma.a -l:libiberty.a   \
+# -l:libboost_system-mt.a -l:libboost_chrono-mt.a -l:libstdc++.a -l:libdl.a -static-libgcc -static-libstdc++ -Wl,-Bstatic -lwinpthread -lcrypt32 -lshlwapi -lwsock32 -liphlpapi -limagehlp -lshlwapi -lbcrypt -lws2_32 -lole32 -loleaut32 -luuid

@@ -16,6 +16,7 @@ AllCops:
     - 'extract/**/*'
     - 'source_filesystem/**/*'
     - '*-package'
+    - '.tebako/**/*'
   NewCops: enable
 
 Style/StringLiterals:
