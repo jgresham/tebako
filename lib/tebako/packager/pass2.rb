@@ -121,8 +121,8 @@ module Tebako
         def msys_libs(ruby_ver)
           <<~SUBST
             #{linux_common_libs} \
-            -l:libssl.a -l:libcrypto.a -l:liblz4.a -l:libz.a -l:libzstd.a -l:libffi.a -l:libgdbm.a -l:libncurses.a -l:libjemalloc.a -l:libunwind.a -l:liblzma.a -l:libiberty.a   \\
-            #{PatchHelpers.yaml_reference(ruby_ver)} -l:libstdc++.a -l:libdl.a -lole32 -loleaut32 -luuid
+            -l:libssl.a -l:libcrypto.a -l:liblz4.a -l:libz.a -l:libzstd.a -l:libffi.a -l:libncurses.a -l:libunwind.a -l:liblzma.a -l:libiberty.a   \\
+            #{PatchHelpers.yaml_reference(ruby_ver)} -l:libboost_system.a -l:libboost_chrono.a -l:libstdc++.a -l:libdl.a -lole32 -loleaut32 -luuid
           SUBST
         end
 
