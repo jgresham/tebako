@@ -29,7 +29,6 @@
 module Tebako
   module Packager
     # Ruby patching literals (pass2)
-    # rubocop:disable Metrics/ModuleLength
     module PatchLiterals
       TOOL_MKCONFIG_RB_PATCH = {
         "    if fast[name]" => <<~SUBST
@@ -247,7 +246,6 @@ module Tebako
           "#include <tebako/tebako-main.h>\n" \
           "/* -- End of tebako patch -- */"
         }
-
       }.freeze
 
       LINUX_PATCHES = {
@@ -274,6 +272,5 @@ module Tebako
       DARWIN_DEP_LIBS = ["glog", "gflags", "brotlienc", "brotlidec", "brotlicommon"].freeze
       # rubocop:enable Style/WordArray
     end
-    # rubocop:enable Metrics/ModuleLength
   end
 end

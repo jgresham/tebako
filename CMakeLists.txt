@@ -38,31 +38,6 @@ determine_version("${CMAKE_CURRENT_SOURCE_DIR}" TEBAKO)
 
 project(tebako_packager VERSION ${TEBAKO_VERSION})
 
-execute_process(
-  COMMAND pwd
-  RESULT_VARIABLE PWD_RES
-  OUTPUT_VARIABLE FS_CURRENT_RAW
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-)
-
-if(NOT (PWD_RES EQUAL 0))
-  message(FATAL_ERROR "Could not determine current folder")
-endif()
-
-if (MINGW)
-  execute_process(
-    COMMAND "cygpath" "-w" ${FS_CURRENT_RAW}
-    RESULT_VARIABLE CYGPATH_RES
-    OUTPUT_VARIABLE FS_CURRENT
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
-  if(NOT (CYGPATH_RES EQUAL 0))
-    message(FATAL_ERROR "Could not map MSys path to Windows")
-  endif()
-else(MINGW)
-  set(FS_CURRENT ${FS_CURRENT_RAW})
-endif(MINGW)
-
 set(RUBY_DEBUG_BUILD OFF)
 
 include(ExternalProject)
@@ -78,13 +53,8 @@ if(NOT LOG_LEVEL)
   set(LOG_LEVEL "error")
 endif()
 
-set(START_WITH_PACKAGED_FILESYSTEM OFF CACHE BOOL "Start workflow from 'packaged filesystem' target!!!" FORCE)
-
 if (NOT ${SETUP_MODE})
   message("Running tebako press script")
-  if (${START_WITH_PACKAGED_FILESYSTEM})
-    message("*** Starting workflow from 'packaged filesystem' target ***")
-  endif(${START_WITH_PACKAGED_FILESYSTEM})
 
   if ("-${ROOT}" STREQUAL "-")
     message(FATAL_ERROR "Project ROOT is not specified.")
@@ -94,12 +64,15 @@ if (NOT ${SETUP_MODE})
     message(FATAL_ERROR "Project ENTRANCE is not specified.")
   endif()
 
+  if ("-${PCKG}" STREQUAL "-")
+    message(FATAL_ERROR "Project OUTPUT PACKAGE is not specified.")
+  endif()
+
   cmake_path(SET FS_ENTRANCE NORMALIZE ${ENTRANCE})
 
   cmake_path(IS_RELATIVE ROOT IS_RT_RELATIVE)
   if(${IS_RT_RELATIVE})
-    cmake_path(SET FS_ROOT NORMALIZE ${FS_CURRENT}/${ROOT})
-    message("Relative path to root '${ROOT}' will be extended to '${FS_ROOT}'")
+    message(FATAL_ERROR "Path to root shall be absolute. Relative path '${FS_ROOT}' is not allowed.")
   else()
     cmake_path(SET FS_ROOT NORMALIZE ${ROOT})
   endif()
@@ -115,15 +88,11 @@ if (NOT ${SETUP_MODE})
     message("Absolute path to entry point '${FS_ENTR_TMP}' will be reduced '${FS_ENTRANCE}' relative to '${FS_ROOT}'")
   endif(${IS_EN_ABSOLUTE})
 
-  if ("-${PCKG}" STREQUAL "-")
-    set(APP_NAME "${FS_CURRENT}/tebako")
+  cmake_path(IS_RELATIVE PCKG IS_PK_RELATIVE)
+  if(${IS_PK_RELATIVE})
+    message(FATAL_ERROR "Path to output package be absolute. Relative path '${PCKG}' is not allowed.")
   else()
-    cmake_path(IS_RELATIVE PCKG IS_PK_RELATIVE)
-    if(${IS_PK_RELATIVE})
-      cmake_path(SET APP_NAME NORMALIZE ${FS_CURRENT}/${PCKG})
-    else()
-      cmake_path(SET APP_NAME NORMALIZE ${PCKG})
-    endif()
+    cmake_path(SET APP_NAME NORMALIZE ${PCKG})
   endif()
 
   message("Packaging ${FS_ROOT} folder with ${FS_ENTRANCE} entry point to ${APP_NAME}")
@@ -566,38 +535,29 @@ else (${SETUP_MODE})
     @ONLY
   )
 
-  if (${START_WITH_PACKAGED_FILESYSTEM})
-    add_custom_target(packaged_filesystem
-      COMMAND chmod +x ${DEPS_BIN_DIR}/*
-      COMMAND ${DEPS_BIN_DIR}/mkdwarfs -o ${DATA_BIN_FILE} -i ${DATA_SRC_DIR}
-      COMMAND ${CMAKE_COMMAND} -E touch ${DEPS_SRC_DIR}/tebako-fs.cpp
-      BYPRODUCTS ${DATA_BIN_FILE}
-    )
-  else(${START_WITH_PACKAGED_FILESYSTEM})
-    add_custom_target(packaged_filesystem
+  add_custom_target(packaged_filesystem
 # [TODO] Open question - whether we shall delete ruby binaries from memfs or not
 #        For debugging purposes it is very handy to have it here
 #
-      COMMAND ${CMAKE_COMMAND} -E rm -rf  ${DATA_SRC_DIR}/share  ${DATA_SRC_DIR}/include   ${DATA_SRC_DIR}/lib/pkgconfig
-                                          ${DATA_SRC_DIR}/bin/bundle${CMD_SUFFIX}  ${DATA_SRC_DIR}/bin/bundle
-                                          ${DATA_SRC_DIR}/bin/bundler${CMD_SUFFIX} ${DATA_SRC_DIR}/bin/bundler
-                                          ${DATA_SRC_DIR}/bin/bundle${BAT_SUFFIX}  ${DATA_SRC_DIR}/bin/bundler${BAT_SUFFIX}
-                                          ${DATA_SRC_DIR}/bin/erb${CMD_SUFFIX}     ${DATA_SRC_DIR}/bin/gem${CMD_SUFFIX}
-                                          ${DATA_SRC_DIR}/bin/irb${CMD_SUFFIX}     ${DATA_SRC_DIR}/bin/racc${CMD_SUFFIX}
-                                          ${DATA_SRC_DIR}/bin/racc2y${CMD_SUFFIX}  ${DATA_SRC_DIR}/bin/rake${BAT_SUFFIX}
-                                          ${DATA_SRC_DIR}/bin/rake                 ${DATA_SRC_DIR}/bin/rdoc${CMD_SUFFIX}
-                                          ${DATA_SRC_DIR}/bin/ri${CMD_SUFFIX}      ${DATA_SRC_DIR}/bin/y2racc${CMD_SUFFIX}
-                                          ${DATA_SRC_DIR}/bin/ruby${EXE_SUFFIX}    ${DATA_SRC_DIR}/bin/ruby${RUBY_SUFFIX}${EXE_SUFFIX}
+    COMMAND ${CMAKE_COMMAND} -E rm -rf  ${DATA_SRC_DIR}/share  ${DATA_SRC_DIR}/include   ${DATA_SRC_DIR}/lib/pkgconfig
+                                        ${DATA_SRC_DIR}/bin/bundle${CMD_SUFFIX}  ${DATA_SRC_DIR}/bin/bundle
+                                        ${DATA_SRC_DIR}/bin/bundler${CMD_SUFFIX} ${DATA_SRC_DIR}/bin/bundler
+                                        ${DATA_SRC_DIR}/bin/bundle${BAT_SUFFIX}  ${DATA_SRC_DIR}/bin/bundler${BAT_SUFFIX}
+                                        ${DATA_SRC_DIR}/bin/erb${CMD_SUFFIX}     ${DATA_SRC_DIR}/bin/gem${CMD_SUFFIX}
+                                        ${DATA_SRC_DIR}/bin/irb${CMD_SUFFIX}     ${DATA_SRC_DIR}/bin/racc${CMD_SUFFIX}
+                                        ${DATA_SRC_DIR}/bin/racc2y${CMD_SUFFIX}  ${DATA_SRC_DIR}/bin/rake${BAT_SUFFIX}
+                                        ${DATA_SRC_DIR}/bin/rake                 ${DATA_SRC_DIR}/bin/rdoc${CMD_SUFFIX}
+                                        ${DATA_SRC_DIR}/bin/ri${CMD_SUFFIX}      ${DATA_SRC_DIR}/bin/y2racc${CMD_SUFFIX}
+                                        ${DATA_SRC_DIR}/bin/ruby${EXE_SUFFIX}    ${DATA_SRC_DIR}/bin/ruby${RUBY_SUFFIX}${EXE_SUFFIX}
 
-      COMMAND ${GNU_BASH} -c "rm -f ${DATA_SRC_DIR}/**/*.a"
-      COMMAND ${GNU_BASH} -c "rm -f ${DATA_SRC_DIR}/**/*.o"
-      COMMAND chmod +x ${DEPS_BIN_DIR}/*
-      COMMAND ${DEPS_BIN_DIR}/mkdwarfs -o ${DATA_BIN_FILE} -i ${DATA_SRC_DIR}
-      COMMAND ${CMAKE_COMMAND} -E touch ${DEPS_SRC_DIR}/tebako/tebako-fs.cpp
-      DEPENDS setup source_filesystem
-      BYPRODUCTS ${DATA_BIN_FILE}
-    )
-  endif (${START_WITH_PACKAGED_FILESYSTEM})
+    COMMAND ${GNU_BASH} -c "rm -f ${DATA_SRC_DIR}/**/*.a"
+    COMMAND ${GNU_BASH} -c "rm -f ${DATA_SRC_DIR}/**/*.o"
+    COMMAND chmod +x ${DEPS_BIN_DIR}/*
+    COMMAND ${DEPS_BIN_DIR}/mkdwarfs -o ${DATA_BIN_FILE} -i ${DATA_SRC_DIR}
+    COMMAND ${CMAKE_COMMAND} -E touch ${DEPS_SRC_DIR}/tebako/tebako-fs.cpp
+    DEPENDS setup source_filesystem
+    BYPRODUCTS ${DATA_BIN_FILE}
+  )
 
   set(CMAKE_CXX_FLAGS "${RUBY_C_FLAGS}")
 

@@ -32,5 +32,8 @@ Gemspec/RequireMFA:
 Layout/LineLength:
   Max: 120
 
+Metrics/ModuleLength:
+  Max: 250
+
 Naming/FileName:
   Enabled: false
