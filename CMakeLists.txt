@@ -553,7 +553,7 @@ else (${SETUP_MODE})
 
     COMMAND ${GNU_BASH} -c "rm -f ${DATA_SRC_DIR}/**/*.a"
     COMMAND ${GNU_BASH} -c "rm -f ${DATA_SRC_DIR}/**/*.o"
-    COMMAND chmod +x ${DEPS_BIN_DIR}/*
+    COMMAND ${GNU_BASH} -c "chmod +x ${DEPS_BIN_DIR}/mkdwarfs${EXE_SUFFIX}"
     COMMAND ${DEPS_BIN_DIR}/mkdwarfs -o ${DATA_BIN_FILE} -i ${DATA_SRC_DIR}
     COMMAND ${CMAKE_COMMAND} -E touch ${DEPS_SRC_DIR}/tebako/tebako-fs.cpp
     DEPENDS setup source_filesystem
